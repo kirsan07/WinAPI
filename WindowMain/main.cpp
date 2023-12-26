@@ -74,12 +74,42 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 
 INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	static BOOL bShowCoords = FALSE;
 	switch (uMsg)
 	{
 	case WM_CREATE:
+	{
 		InitCommonControls();
 		g_hwndTrackingTT = CreateTrackingToolTip(IDC_TOOLTIP, hwnd, (LPSTR)"");
-		return TRUE;
+		CreateWindowEx
+		(
+			NULL,
+			"Button",
+			"Показать координаты мыши",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+			10, 10,
+			250, 20,
+			hwnd,
+			(HMENU)IDC_CHECKBOX_MOUSE_COORDS,
+			GetModuleHandle(NULL),
+			NULL
+		);
+		INT parts[2] = { 64, -1 };
+		HWND hStatus = CreateWindowEx
+		(
+			NULL,
+			STATUSCLASSNAME,
+			"Status bar",
+			WS_CHILD | WS_VISIBLE,
+			0, 0, 0, 0,
+			hwnd,
+			(HMENU)IDM_STATUS,
+			GetModuleHandle(NULL),
+			NULL
+		);
+		SendMessage(hStatus, SB_SETPARTS, 2, (LPARAM)parts);
+	}
+	return TRUE;
 	case WM_MOUSELEAVE:
 		SendMessage(g_hwndTrackingTT, TTM_TRACKACTIVATE, (WPARAM)FALSE, (LPARAM)&g_toolItem);
 		g_trackingMouse = FALSE;
@@ -96,7 +126,8 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			TrackMouseEvent(&tme);
 
-			SendMessage(g_hwndTrackingTT, TTM_TRACKACTIVATE, (WPARAM)TRUE, (LPARAM)&g_toolItem);
+			if (bShowCoords)
+				SendMessage(g_hwndTrackingTT, TTM_TRACKACTIVATE, (WPARAM)TRUE, (LPARAM)&g_toolItem);
 			g_trackingMouse = TRUE;
 		}
 		GetClientRect(hwnd, &g_toolItem.rect);
@@ -117,6 +148,9 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ClientToScreen(hwnd, &pt);
 			SendMessage(g_hwndTrackingTT, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y - 20));
 		}
+		CHAR sz_status[256]{};
+		sprintf(sz_status, "Mouse position: %ix%i", oldX, oldY);
+		SendMessage(GetDlgItem(hwnd, IDM_STATUS), SB_SETTEXT, 1, (LPARAM)sz_status);
 	}
 	return FALSE;
 	case WM_SIZE:
@@ -130,12 +164,31 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			rect.left, rect.top,
 			rect.right - rect.left, rect.bottom - rect.top);
 		SendMessage(hwnd, WM_SETTEXT, 0, (LPARAM)sz_title);
+		//RECT rect;
+		//GetClientRect(hwnd, &rect);
+		SetWindowPos(GetDlgItem(hwnd, IDM_STATUS), NULL, 0, 0, 0, 0, SWP_NOMOVE);
+		UpdateWindow(hwnd);
 	}
 	break;
 	case WM_COMMAND:
-		break;
+	{
+		switch (LOWORD(wParam))
+		{
+		case IDC_CHECKBOX_MOUSE_COORDS:
+			if (SendMessage(GetDlgItem(hwnd, IDC_CHECKBOX_MOUSE_COORDS), BM_GETCHECK, 0, 0) == BST_CHECKED)bShowCoords = TRUE;
+			else bShowCoords = FALSE;
+			break;
+		}
+	}
+	break;
 	case WM_DESTROY:PostQuitMessage(0); break;
-	case WM_CLOSE:	DestroyWindow(hwnd); break;
+	case WM_CLOSE:
+		switch (MessageBox(hwnd, "Вы действительно хотите закрыть окно?", "Вопрос", MB_YESNO | MB_ICONQUESTION))
+		{
+		case IDYES:	DestroyWindow(hwnd);
+		case IDNO:	break;
+		}
+		break;
 	default:		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 	return 0;
@@ -164,7 +217,10 @@ HWND CreateTrackingToolTip(INT	toolID, HWND hwnd, LPSTR lpszText)
 	g_toolItem.hinst = GetModuleHandle(NULL);
 	g_toolItem.lpszText = lpszText;
 	g_toolItem.uId = (UINT_PTR)hwnd;
+
 	GetClientRect(hwnd, &g_toolItem.rect);
+
+	//Associate the tooltip with the tool window.
 	SendMessage(hwndTT, TTM_ADDTOOL, 0, (LPARAM)(LPTOOLINFO)&g_toolItem);
 	return hwndTT;
 }

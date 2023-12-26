@@ -13,6 +13,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\NewFilter1">
+      <UniqueIdentifier>{e07b6cfc-bb25-42fa-984e-17e212e35f40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\NewFilter1\RB">
+      <UniqueIdentifier>{9f35494f-d2a7-47d6-906d-c71473f794fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\NewFilter1\RG">
+      <UniqueIdentifier>{693b268f-81c4-4b1c-9688-ff20b795bcdb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\NewFilter1\SB">
+      <UniqueIdentifier>{5c85a73e-900f-471c-bbe0-2b2c1ec3efe7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\NewFilter1\SG">
+      <UniqueIdentifier>{589f12c4-adad-4c8d-98e9-6e755e706880}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -32,6 +47,18 @@
   <ItemGroup>
     <Image Include="Icon.ico">
       <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Bitmap.bmp">
+      <Filter>Source Files\NewFilter1\SG</Filter>
+    </Image>
+    <Image Include="Bitmap1.bmp">
+      <Filter>Source Files\NewFilter1\SB</Filter>
+    </Image>
+    <Image Include="Bitmap2.bmp">
+      <Filter>Source Files\NewFilter1\RG</Filter>
+    </Image>
+    <Image Include="Bitmap3.bmp">
+      <Filter>Source Files\NewFilter1\RB</Filter>
     </Image>
   </ItemGroup>
 </Project>
