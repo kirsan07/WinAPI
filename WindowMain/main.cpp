@@ -4,7 +4,6 @@
 #include<cstdio>
 #include<CommCtrl.h>
 #include"resource.h"
-
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
@@ -25,7 +24,6 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.style = 0;
-
 	wc.hIcon = (HICON)LoadImage(hInstance, "earth.ico", IMAGE_ICON, LR_DEFAULTSIZE, LR_DEFAULTSIZE, LR_LOADFROMFILE);
 	wc.hIconSm = (HICON)LoadImage(hInstance, "moon.ico", IMAGE_ICON, LR_DEFAULTSIZE, LR_DEFAULTSIZE, LR_LOADFROMFILE);
 	wc.hCursor = (HCURSOR)LoadImage(hInstance, "Background.ani", IMAGE_CURSOR, LR_DEFAULTSIZE, LR_DEFAULTSIZE, LR_LOADFROMFILE);
@@ -50,13 +48,13 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 	HWND hwnd = CreateWindowEx
 	(
 		NULL,	
-		g_sz_WINDOW_CLASS,
-		g_sz_WINDOW_CLASS,
+		g_sz_WINDOW_CLASS,	
+		g_sz_WINDOW_CLASS,	
 		WS_OVERLAPPEDWINDOW,
 		window_start_x, window_start_y,	
-		window_width, window_height,	
+		window_width, window_height,
 		NULL,	
-		NULL,	
+		NULL,
 		hInstance,
 		NULL
 	);
@@ -68,6 +66,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
+		IsDialogMessage(hwnd, &msg);
 	}
 	return msg.wParam;
 }
@@ -94,6 +93,18 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL
 		);
+
+		HWND hRoundButton = CreateWindowEx
+		(
+			NULL, "Button", "Round button",
+			WS_CHILDWINDOW | WS_VISIBLE | BS_OWNERDRAW,
+			100, 100, 100, 100,
+			hwnd,
+			(HMENU)IDC_ROUND_BUTTON,
+			GetModuleHandle(NULL),
+			NULL
+		);
+
 		INT parts[2] = { 64, -1 };
 		HWND hStatus = CreateWindowEx
 		(
@@ -220,7 +231,6 @@ HWND CreateTrackingToolTip(INT	toolID, HWND hwnd, LPSTR lpszText)
 
 	GetClientRect(hwnd, &g_toolItem.rect);
 
-	//Associate the tooltip with the tool window.
 	SendMessage(hwndTT, TTM_ADDTOOL, 0, (LPARAM)(LPTOOLINFO)&g_toolItem);
 	return hwndTT;
 }
