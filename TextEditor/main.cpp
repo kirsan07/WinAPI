@@ -1,4 +1,4 @@
-?#include<Windows.h>
+#include<Windows.h>
 #include<Richedit.h>
 #include"resource.h"
 
@@ -9,6 +9,9 @@ INT CALLBACK DlgProcAbout(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 BOOL LoadTextFileToEdit(HWND hEdit, LPCSTR lpszFileName);
 BOOL SaveTextFileFromEdit(HWND hEdit, LPCSTR lpszFileName);
+VOID SelectFont(HWND hwnd);
+HFONT g_hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+COLORREF g_RGB_Text = RGB(0, 0, 0);
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, INT nCmdShow)
 {
@@ -69,6 +72,9 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	static CHAR szFileName[MAX_PATH]{};
+	static CHAR* szFileText = NULL;
+	static BOOL onSave = TRUE;
+
 	switch (uMsg)
 	{
 	case WM_CREATE:
@@ -79,7 +85,7 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		HWND hEdit = CreateWindowEx
 		(
 			NULL, RICHEDIT_CLASS, "",
-			WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL,
+			WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL | WS_HSCROLL | WS_VSCROLL,
 			0, 0,
 			rect.right, rect.bottom,
 			hwnd,
@@ -87,6 +93,22 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL
 		);
+		g_hFont = CreateFont
+		(
+			32, 11,
+			0, 0, FW_MEDIUM,
+			0, 0, 0,	
+			RUSSIAN_CHARSET,
+			OUT_TT_PRECIS,
+			CLIP_CHARACTER_PRECIS,
+			ANTIALIASED_QUALITY,
+			FF_DONTCARE,
+			"Tahoma"
+		);
+		SendMessage(hEdit, WM_SETFONT, (WPARAM)g_hFont, TRUE);
+		SetFocus(hEdit);
+		RegisterHotKey(hwnd, ID_FILE_OPEN + 10000, MOD_CONTROL, 'O');
+		RegisterHotKey(hwnd, ID_FILE_SAVE + 10000, MOD_CONTROL, 'S');
 	}
 	break;
 	case WM_SIZE:
@@ -96,15 +118,25 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		SetWindowPos(GetDlgItem(hwnd, IDC_EDIT), NULL, rect.left, rect.top, rect.right, rect.bottom, SWP_NOZORDER);
 	}
 	break;
+	case WM_CTLCOLOREDIT:
+	{
+		HDC hdc = (HDC)wParam;
+		SetBkMode(hdc, OPAQUE);
+		SetBkColor(hdc, RGB(255, 255, 255));
+		HBRUSH hBrush = CreateSolidBrush(g_RGB_Text);
+		SetTextColor(hdc, g_RGB_Text);
+		return (LRESULT)hBrush;
+	}
+	break;
 	case WM_COMMAND:
 	{
 		switch (LOWORD(wParam))
 		{
 		case ID_FILE_OPEN:
 		{
+
 			OPENFILENAME ofn;
 			ZeroMemory(&ofn, sizeof(ofn));
-
 
 			ofn.lStructSize = sizeof(ofn);
 			ofn.hwndOwner = hwnd;
@@ -117,12 +149,16 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if (GetOpenFileName(&ofn))
 			{
 				HWND hEdit = GetDlgItem(hwnd, IDC_EDIT);
-				LoadTextFileToEdit(hEdit, szFileName);
+				onSave = LoadTextFileToEdit(hEdit, szFileName);
 			}
 		}
 		break;
 		case ID_FILE_SAVE:
-			if (strlen(szFileName))SaveTextFileFromEdit(GetDlgItem(hwnd, IDC_EDIT), szFileName);
+			if (strlen(szFileName))
+			{
+				onSave = SaveTextFileFromEdit(GetDlgItem(hwnd, IDC_EDIT), szFileName);
+				SendMessage(GetDlgItem(hwnd, IDC_EDIT), EM_SETMODIFY, FALSE, 0);
+			}
 			else SendMessage(hwnd, WM_COMMAND, ID_FILE_SAVEAS, 0);
 			break;
 		case ID_FILE_SAVEAS:
@@ -138,17 +174,51 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 			ofn.lpstrDefExt = "txt";
 
-			if (GetSaveFileName(&ofn))SaveTextFileFromEdit(GetDlgItem(hwnd, IDC_EDIT), szFileName);
+			if (GetSaveFileName(&ofn))
+			{
+				onSave = SaveTextFileFromEdit(GetDlgItem(hwnd, IDC_EDIT), szFileName);
+				SendMessage(GetDlgItem(hwnd, IDC_EDIT), EM_SETMODIFY, FALSE, 0);
+			}
 		}
 		break;
+		case ID_FORMAT_FONT: SelectFont(hwnd); break;
 		case ID_HELP_ABOUT:
 			DialogBoxParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG_ABOUT), hwnd, DlgProcAbout, 0);
 			break;
 		}
 	}
 	break;
+	case WM_HOTKEY:
+	{
+		switch (wParam)
+		{
+		case ID_FILE_OPEN + 10000: 
+		case ID_FILE_SAVE + 10000: SendMessage(hwnd, WM_COMMAND, LOWORD(wParam - 10000), 0); break;
+		}
+	}
+	break;
 	case WM_DESTROY:PostQuitMessage(0);	break;
-	case WM_CLOSE:	DestroyWindow(hwnd); break;
+	case WM_CLOSE:
+		if (SendMessage(GetDlgItem(hwnd, IDC_EDIT), EM_GETMODIFY, 0, 0))
+		{
+			onSave = FALSE;
+			switch
+				(
+					MessageBox(
+						hwnd,
+						"Сохранить изменения в файле?",
+						"Хотите ли Вы",
+						MB_YESNOCANCEL | MB_ICONQUESTION)
+					)
+			{
+			case IDYES:		SendMessage(hwnd, WM_COMMAND, ID_FILE_SAVE, 0);
+				if (onSave)DestroyWindow(hwnd); break;
+			case IDNO:		DestroyWindow(hwnd);
+			case IDCANCEL:	break;
+			}
+		}
+		else DestroyWindow(hwnd);
+		break;
 	default:		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 	return FALSE;
@@ -217,4 +287,37 @@ BOOL SaveTextFileFromEdit(HWND hEdit, LPCSTR lpszFileName)
 		CloseHandle(hFile);
 	}
 	return bSuccess;
+}
+VOID SelectFont(HWND hwnd)
+{
+	HWND hEdit = GetDlgItem(hwnd, IDC_EDIT);
+
+	CHOOSEFONT cf;
+	LOGFONT lf;
+	ZeroMemory(&cf, sizeof(cf));
+	ZeroMemory(&lf, sizeof(lf));
+
+	GetObject(g_hFont, sizeof(LOGFONT), &lf);
+
+	cf.lStructSize = sizeof(cf);
+	cf.hwndOwner = hwnd;
+
+	cf.Flags = CF_EFFECTS | CF_INITTOLOGFONTSTRUCT | CF_SCREENFONTS;
+
+	cf.hInstance = GetModuleHandle(NULL);
+	cf.lpLogFont = &lf;
+	cf.rgbColors = g_RGB_Text;
+
+	if (ChooseFont(&cf))
+	{
+		HFONT hf = CreateFontIndirect(&lf);
+		if (hf)g_hFont = hf;
+		else MessageBox(hwnd, "Font creation failed", "Error", MB_OK | MB_ICONERROR);
+	}
+	SendMessage(hEdit, WM_SETFONT, (WPARAM)g_hFont, TRUE);
+	g_RGB_Text = cf.rgbColors;
+
+	HDC hdc = GetDC(hEdit);
+	SendMessage(hwnd, WM_CTLCOLOREDIT, (WPARAM)hdc, (LPARAM)hEdit);
+	ReleaseDC(hEdit, hdc);
 }

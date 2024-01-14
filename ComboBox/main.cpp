@@ -29,7 +29,7 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			SendMessage(hCombo, CB_ADDSTRING, 0, (LPARAM)g_sz_VALUES[i]);
 		}
-		SendMessage(hCombo, CB_SETCURSEL, 0, 0);	//Сразу же выбираем нулевой элемент ComboBox
+		SendMessage(hCombo, CB_SETCURSEL, 0, 0);	
 	}
 	break;
 	case WM_COMMAND:
@@ -56,7 +56,7 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			HWND hCombo = GetDlgItem(hwnd, IDC_COMBO1);
 			CHAR sz_buffer[MAX_PATH]{};
 			CHAR sz_message[MAX_PATH]{};
-			int i = SendMessage(hCombo, CB_GETCURSEL, 0, 0);	//Получаем номер выбранного элемента ComboBox
+			int i = SendMessage(hCombo, CB_GETCURSEL, 0, 0);	
 			SendMessage(hCombo, CB_GETLBTEXT, i, (LPARAM)sz_buffer);
 			sprintf(sz_message, "Вы выбрали пункт %i со значением \"%s\".", i, sz_buffer);
 			MessageBox(hwnd, sz_message, "Info", MB_OK | MB_ICONINFORMATION);

@@ -1,4 +1,4 @@
-﻿﻿#define _CRT_SECURE_NO_WARNINGS
+﻿﻿﻿#define _CRT_SECURE_NO_WARNINGS
 #include<Windows.h>
 #include<iostream>
 #include"resource.h"
@@ -30,6 +30,7 @@ VOID SetSkin(HWND hwnd, CONST CHAR skin[]);
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, INT nCmdShow)
 {
+
 	WNDCLASSEX wc;
 	ZeroMemory(&wc, sizeof(wc));
 	wc.cbSize = sizeof(wc);
@@ -55,7 +56,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 
 	HWND hwnd = CreateWindowEx
 	(
-		NULL,
+		NULL,	
 		g_sz_CLASSNAME,		
 		g_sz_CLASSNAME,		
 		WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX,
@@ -74,7 +75,6 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 	ShowWindow(hwnd, nCmdShow);
 	UpdateWindow(hwnd);
 
-	
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0) > 0)
 	{
@@ -95,9 +95,7 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	static BOOL		input = FALSE;
 	static BOOL		operation_input = FALSE;
 	static BOOL		in_default_state = TRUE;
-
 	static CHAR		sz_skin[FILENAME_MAX] = "square_blue";
-
 	static UINT colorref = 0;
 
 	switch (uMsg)
@@ -131,6 +129,7 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			"digital-7"
 		);
 		SendMessage(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
+
 		for (int i = 6; i >= 0; i -= 3)
 		{
 			for (int j = 0; j < 3; j++)
@@ -250,9 +249,6 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		HDC hdc = (HDC)wParam;
 		SetBkMode(hdc, OPAQUE);
-		//SetBkColor(hdc, clrDisplayBackground);
-		//HBRUSH hBrush = CreateSolidBrush(clrWindowBackground);
-		//SetTextColor(hdc, clrDiplayFont);
 		SetBkColor(hdc, g_clr_COLORS[colorref][0]);
 		HBRUSH hBrush = CreateSolidBrush(g_clr_COLORS[colorref][1]);
 		SetTextColor(hdc, g_clr_COLORS[colorref][2]);
@@ -323,7 +319,7 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	break;
 	case WM_KEYDOWN:
 	{
-		if (GetKeyState(VK_SHIFT) < 0 && wParam == 0x38)SendMessage(hwnd, WM_COMMAND, IDC_BUTTON_ASTER, 0);
+		if (GetKeyState(VK_CONTROL) < 0 && wParam == 0x38)SendMessage(hwnd, WM_COMMAND, IDC_BUTTON_ASTER, 0);
 		else if (wParam >= 0x30 && wParam <= 0x39)
 			SendMessage(hwnd, WM_COMMAND, LOWORD(wParam - 0x30 + 1000), 0);
 		if (wParam >= 0x60 && wParam <= 0x69)

@@ -137,11 +137,16 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\Downloads\cursor.png" />
+    <Image Include="..\..\..\..\Downloads\free-icon-app-store-831327.png" />
     <Image Include="..\..\..\..\Downloads\icons8-contact-management-system-48.png" />
     <Image Include="..\..\..\..\Downloads\icons8-средние-иконки-48.png" />
     <Image Include="..\..\..\..\Downloads\management.png" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="..\..\..\..\Desktop\Hello.txt" />
+    <Text Include="..\..\..\..\Desktop\HKcheck.txt" />
+    <Text Include="..\..\..\..\Desktop\Something.txt" />
+    <Text Include="..\..\..\..\Desktop\Something2.txt" />
     <Text Include="..\..\..\..\Downloads\savechek.txt" />
     <Text Include="..\..\..\..\Downloads\text1.txt" />
   </ItemGroup>

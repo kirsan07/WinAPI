@@ -48,12 +48,27 @@
     <Image Include="..\..\..\..\Downloads\management.png">
       <Filter>Resource Files\ICO</Filter>
     </Image>
+    <Image Include="..\..\..\..\Downloads\free-icon-app-store-831327.png">
+      <Filter>Resource Files\TEXT</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\..\..\Downloads\text1.txt">
       <Filter>Resource Files\TEXT</Filter>
     </Text>
     <Text Include="..\..\..\..\Downloads\savechek.txt">
+      <Filter>Resource Files\TEXT</Filter>
+    </Text>
+    <Text Include="..\..\..\..\Desktop\Hello.txt">
+      <Filter>Resource Files\TEXT</Filter>
+    </Text>
+    <Text Include="..\..\..\..\Desktop\HKcheck.txt">
+      <Filter>Resource Files\TEXT</Filter>
+    </Text>
+    <Text Include="..\..\..\..\Desktop\Something.txt">
+      <Filter>Resource Files\TEXT</Filter>
+    </Text>
+    <Text Include="..\..\..\..\Desktop\Something2.txt">
       <Filter>Resource Files\TEXT</Filter>
     </Text>
   </ItemGroup>
